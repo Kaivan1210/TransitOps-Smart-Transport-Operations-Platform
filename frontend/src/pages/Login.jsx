@@ -164,32 +164,32 @@ const Login = () => {
             <span className="text-xs font-bold uppercase tracking-widest text-gray-500 flex items-center gap-1.5">
               <UserCheck className="h-4 w-4 text-blue-500" /> Demo Sandbox Accounts
             </span>
-            <span className="text-[10px] text-gray-600 font-mono">Pass: admin123</span>
+            <span className="text-[10px] text-gray-600 font-mono">Pass: TransitOps@2024</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-2xs">
             <button
-              onClick={() => selectDemoRole('admin@transitops.com', 'admin123')}
+              onClick={() => selectDemoRole('admin@transitops.com', 'TransitOps@2024')}
               className="flex flex-col items-start p-3 rounded-xl bg-gray-950/40 border border-gray-800/80 hover:border-blue-500/50 hover:bg-blue-600/5 text-left transition group"
             >
               <span className="font-bold text-blue-400 group-hover:text-blue-300">Administrator</span>
               <span className="text-[10px] text-gray-500 mt-0.5 truncate w-full">admin@transitops.com</span>
             </button>
             <button
-              onClick={() => selectDemoRole('dispatcher@transitops.com', 'admin123')}
+              onClick={() => selectDemoRole('dispatcher@transitops.com', 'TransitOps@2024')}
               className="flex flex-col items-start p-3 rounded-xl bg-gray-950/40 border border-gray-800/80 hover:border-purple-500/50 hover:bg-purple-600/5 text-left transition group"
             >
               <span className="font-bold text-purple-400 group-hover:text-purple-300">Dispatcher</span>
               <span className="text-[10px] text-gray-500 mt-0.5 truncate w-full">dispatcher@transitops.com</span>
             </button>
             <button
-              onClick={() => selectDemoRole('maintenance@transitops.com', 'admin123')}
+              onClick={() => selectDemoRole('maintenance@transitops.com', 'TransitOps@2024')}
               className="flex flex-col items-start p-3 rounded-xl bg-gray-950/40 border border-gray-800/80 hover:border-amber-500/50 hover:bg-amber-600/5 text-left transition group"
             >
               <span className="font-bold text-amber-400 group-hover:text-amber-300">Maintenance</span>
               <span className="text-[10px] text-gray-500 mt-0.5 truncate w-full">maintenance@transitops.com</span>
             </button>
             <button
-              onClick={() => selectDemoRole('driver@transitops.com', 'admin123')}
+              onClick={() => selectDemoRole('driver@transitops.com', 'TransitOps@2024')}
               className="flex flex-col items-start p-3 rounded-xl bg-gray-950/40 border border-gray-800/80 hover:border-emerald-500/50 hover:bg-emerald-600/5 text-left transition group"
             >
               <span className="font-bold text-emerald-400 group-hover:text-emerald-300">Fleet Driver</span>

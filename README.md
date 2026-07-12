@@ -115,10 +115,10 @@ Frontend runs at: **http://localhost:5173**
 
 | Role | Email | Password |
 |------|-------|----------|
-| Administrator | admin@transitops.com | admin123 |
-| Dispatcher | dispatcher@transitops.com | admin123 |
-| Maintenance Mgr | maintenance@transitops.com | admin123 |
-| Driver | driver@transitops.com | admin123 |
+| Administrator | admin@transitops.com | TransitOps@2024 |
+| Dispatcher | dispatcher@transitops.com | TransitOps@2024 |
+| Maintenance Mgr | maintenance@transitops.com | TransitOps@2024 |
+| Driver | driver@transitops.com | TransitOps@2024 |
 
 ---
 
