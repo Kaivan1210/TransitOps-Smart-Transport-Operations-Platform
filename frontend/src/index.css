@@ -164,6 +164,66 @@ div[role="dialog"],
   border-radius: 20px !important;
 }
 
+/* ─── Chat Markdown Rendering ───────────────────────────────────────────── */
+.markdown-content {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.markdown-content p {
+  margin-bottom: 8px;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content strong {
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.markdown-content ul {
+  list-style-type: disc;
+  margin-left: 16px;
+  margin-bottom: 8px;
+}
+
+.markdown-content ol {
+  list-style-type: decimal;
+  margin-left: 16px;
+  margin-bottom: 8px;
+}
+
+.markdown-content li {
+  margin-bottom: 4px;
+}
+
+.markdown-content code {
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #a7f3d0; /* Soft emerald accent for codes */
+}
+
+.markdown-content pre {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+.markdown-content pre code {
+  background: transparent;
+  padding: 0;
+  color: #e2e8f0;
+}
+
 /* ─── Recharts custom ────────────────────────────────────────────────────── */
 .recharts-tooltip-wrapper .recharts-default-tooltip {
   background: rgba(7, 12, 26, 0.95) !important;

@@ -8,6 +8,7 @@ import {
   Shield, Activity, Settings, Bell, Search, Home, TrendingUp, Package, Navigation
 } from 'lucide-react';
 import api from '../api/axiosInstance';
+import ReactMarkdown from 'react-markdown';
 
 // ─── Role Theme System ──────────────────────────────────────────────────────
 const THEMES = {
@@ -385,9 +386,13 @@ const DashboardLayout = ({ children }) => {
                         ? `bg-gradient-to-br ${theme.chatBubble} text-white rounded-tr-sm shadow-lg`
                         : 'bg-[#0b1024] border border-white/[0.06] text-gray-200 rounded-tl-sm'
                     }`}>
-                      {msg.text.split('\n').map((line, idx) => (
-                        <p key={idx} className={idx > 0 ? 'mt-1.5' : ''}>{line}</p>
-                      ))}
+                      {msg.sender === 'user' ? (
+                        msg.text
+                      ) : (
+                        <ReactMarkdown className="markdown-content">
+                          {msg.text}
+                        </ReactMarkdown>
+                      )}
                     </div>
                   </motion.div>
                 ))}
