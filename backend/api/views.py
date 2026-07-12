@@ -663,6 +663,76 @@ def get_fleet_summary():
     )
 
 
+def get_local_fallback_reply(message):
+    try:
+        from .models import Vehicle, Driver, Trip, MaintenanceLog
+        
+        total_vehicles = Vehicle.objects.filter(is_active=True).count()
+        avail_vehicles = Vehicle.objects.filter(is_active=True, status='AVAILABLE').count()
+        trip_vehicles = Vehicle.objects.filter(is_active=True, status='ON_TRIP').count()
+        maint_vehicles = Vehicle.objects.filter(is_active=True, status='MAINTENANCE').count()
+        
+        total_drivers = Driver.objects.filter(is_active=True).count()
+        avail_drivers = Driver.objects.filter(is_active=True, status='AVAILABLE').count()
+        trip_drivers = Driver.objects.filter(is_active=True, status='ON_TRIP').count()
+        
+        active_trips = Trip.objects.filter(is_active=True, status='IN_PROGRESS').count()
+        pending_trips = Trip.objects.filter(is_active=True, status='SCHEDULED').count()
+        
+        active_maint = MaintenanceLog.objects.filter(status='IN_PROGRESS').count()
+        
+        msg = message.lower()
+        
+        if "utilization" in msg or "summary" in msg or "fleet" in msg or "snapshot" in msg:
+            util_pct = round((trip_vehicles / total_vehicles * 100)) if total_vehicles > 0 else 0
+            return (
+                f"### 📊 Fleet Operations Summary (Local Fallback)\n\n"
+                f"Your Gemini API key has exceeded its billing cap, but you can continue querying local database stats:\n\n"
+                f"- **Fleet Utilization:** **{util_pct}%** ({trip_vehicles} of {total_vehicles} vehicles active on roads).\n"
+                f"- **Active Trips:** **{active_trips} in progress**, with {pending_trips} scheduled dispatches pending.\n"
+                f"- **Workforce Roster:** **{avail_drivers} available drivers** out of a total staff of {total_drivers}.\n"
+                f"- **Maintenance Logs:** **{active_maint} active repair tasks** currently in the workshop.\n\n"
+                f"*To restore full AI conversational capabilities, please adjust your project spend cap at [ai.studio/spend](https://ai.studio/spend).*"
+            )
+        elif "vehicle" in msg or "truck" in msg:
+            return (
+                f"### 🚛 Fleet Vehicles Status (Local Fallback)\n\n"
+                f"- **Total Registry:** {total_vehicles} registered assets.\n"
+                f"- **Available for Dispatch:** {avail_vehicles} vehicles.\n"
+                f"- **Active on Routes:** {trip_vehicles} vehicles.\n"
+                f"- **Undergoing Servicing:** {maint_vehicles} vehicles.\n\n"
+                f"To dispatch a new route or update vehicle states, navigate to the **Fleet Registry** page."
+            )
+        elif "driver" in msg or "staff" in msg:
+            return (
+                f"### 🪪 Drivers Roster Status (Local Fallback)\n\n"
+                f"- **Total Drivers:** {total_drivers} registered operators.\n"
+                f"- **Available for Assignment:** {avail_drivers} drivers.\n"
+                f"- **On Active Trips:** {trip_drivers} drivers.\n\n"
+                f"Please verify driver license expiration states inside the **Driver Roster** console before scheduling new runs."
+            )
+        elif "maintenance" in msg or "repair" in msg or "workshop" in msg:
+            return (
+                f"### 🔧 Fleet Maintenance Summary (Local Fallback)\n\n"
+                f"- **Active Repair Logs:** {active_maint} vehicles currently in workshop status.\n"
+                f"- **OOS (Out of Service) Assets:** {Vehicle.objects.filter(is_active=True, status='OUT_OF_SERVICE').count()} vehicles.\n\n"
+                f"To release a vehicle back to service, complete its log entries inside the **Fleet Workshop** portal."
+            )
+        else:
+            return (
+                f"### 👋 TransitOps Copilot (Local Fallback Mode)\n\n"
+                f"TransitOps Copilot is currently operating in **Local Database Mode** because your Gemini API key has hit its Monthly Spending Limit.\n\n"
+                f"**Current Database Counts:**\n"
+                f"- Active Trips: **{active_trips}**\n"
+                f"- Available Vehicles: **{avail_vehicles}** of {total_vehicles} total\n"
+                f"- Available Drivers: **{avail_drivers}** of {total_drivers} total\n"
+                f"- Workshop Repairs: **{active_maint} active**\n\n"
+                f"You can ask about *'summary'*, *'vehicles'*, *'drivers'*, or *'maintenance'* to retrieve local stats instantly."
+            )
+    except Exception as inner_e:
+        return f"⚠️ Copilot Offline: Database queries failed ({str(inner_e)})"
+
+
 class AIAssistantView(APIView):
     """
     POST /api/ai/chat/
@@ -705,14 +775,9 @@ class AIAssistantView(APIView):
             return Response({'reply': interaction.output_text}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            error_msg = str(e)
-            fallback_text = (
-                "⚠️ TransitOps Copilot is offline.\n\n"
-                f"Error: {error_msg[:300]}\n\n"
-                "── Live Fleet Snapshot ──\n"
-                f"{get_fleet_summary()}"
-            )
+            fallback_text = get_local_fallback_reply(user_message)
             return Response({'reply': fallback_text}, status=status.HTTP_200_OK)
+
 
 
 
