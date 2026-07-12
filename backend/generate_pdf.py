@@ -209,6 +209,14 @@ def create_workflow_pdf(filename="TransitOps_Workflow_Matrix.pdf"):
     story.append(Paragraph("Keeps fuel and general expenses synchronized with strict math checks:", body_style))
     story.append(Paragraph("• <b>Fuel Log Odometer Check:</b> Odometer inputs must exceed the vehicle's last recorded odometer reading. Successful logging automatically updates the vehicle's odometer value.", bullet_style))
     story.append(Paragraph("• <b>Cost Aggregation:</b> Expense logs (tolls, lodging, etc.) are matched with dispatch IDs, rolling up into the monthly financial audit views.", bullet_style))
+    story.append(Spacer(1, 8))
+    
+    # 3.4 Live Tracking & External Navigation
+    story.append(Paragraph("3.4 Live Location Tracking & External Navigation", h2_style))
+    story.append(Paragraph("Integrates real-world routing and GPS tracking interfaces dynamically:", body_style))
+    story.append(Paragraph("• <b>Light-Mode Vector Mapping:</b> Utilizes Leaflet.js and CartoDB Voyager light tiles to draw road paths by geocoding origin/destination parameters using Nominatim and calculating OSRM coordinates.", bullet_style))
+    story.append(Paragraph("• <b>Speed & Progress Simulation:</b> Active dispatches show real-time animated indicator progress, variable speed control, and continuous ETA estimations.", bullet_style))
+    story.append(Paragraph("• <b>Google Maps External Link:</b> Provides deep-linked 'Navigate (Google Maps)' controls to load origin/destination address variables directly in external routing tabs.", bullet_style))
     story.append(Spacer(1, 10))
     
     # ─── SECTION 4: AI ASSISTANT ───
