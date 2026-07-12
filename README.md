@@ -1,212 +1,188 @@
-# 🚌 TransitOps — Smart Transport Operations Platform
+# 🚛 TransitOps — Smart Transport Operations Platform
 
-> A production-quality fleet management SaaS platform built for the hackathon.
-> Manage vehicles, drivers, trips, maintenance, fuel and expenses — all in one dashboard.
+<p align="center">
+  <img src="frontend/public/bg-highway.png" alt="TransitOps Banner" width="600" style="border-radius: 12px" />
+</p>
 
-![Platform Banner](https://img.shields.io/badge/TransitOps-Smart%20Transport-blue?style=for-the-badge)
-![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&style=flat-square)
-![Django](https://img.shields.io/badge/Django-5-092E20?logo=django&style=flat-square)
-![JWT](https://img.shields.io/badge/Auth-JWT-orange?style=flat-square)
+<p align="center">
+  <strong>A production-grade, full-stack fleet management system powered by Django REST Framework + React + Gemini AI.</strong>
+</p>
 
 ---
 
-## 📐 Architecture Overview
+## ✨ Features
 
-```
-TransitOps/
-├── backend/               # Django 5 + DRF + SimpleJWT
-│   ├── api/               # Core application
-│   │   ├── models.py      # All database entities (UUID PKs, RBAC)
-│   │   ├── serializers.py # DRF serializers + custom JWT claims
-│   │   ├── views.py       # ViewSets + Auth + Analytics views
-│   │   ├── permissions.py # Role-based permission classes
-│   │   └── urls.py        # API router + auth endpoints
-│   ├── transitops_backend/
-│   │   ├── settings.py    # Env-driven configuration
-│   │   └── urls.py        # Root URL config
-│   ├── seed.py            # Demo data seeder
-│   ├── requirements.txt
-│   └── .env.example
-│
-└── frontend/              # React 18 + Vite + Tailwind CSS v4
-    ├── src/
-    │   ├── api/
-    │   │   └── axiosInstance.js  # Axios + silent JWT refresh interceptor
-    │   ├── components/
-    │   │   ├── DashboardLayout.jsx  # Sidebar + header shell
-    │   │   └── ProtectedRoute.jsx   # Auth + RBAC navigation guard
-    │   ├── context/
-    │   │   └── AuthContext.jsx      # Global auth state (login/logout/hasRole)
-    │   ├── pages/
-    │   │   ├── Login.jsx
-    │   │   ├── Dashboard.jsx
-    │   │   ├── Vehicles.jsx
-    │   │   ├── Drivers.jsx
-    │   │   └── Unauthorized.jsx
-    │   └── App.jsx                  # Router + route definitions
-    └── .env.example
-```
+### 🏎️ Core Fleet Management
+- **Vehicle Registry** — Full CRUD with soft-delete, status tracking (Available, On Trip, Maintenance, Out of Service), VIN/license validation
+- **Driver Registry** — License class management (Class A/B/C), real-time expiry tracking, automatic Driver Profile creation on registration
+- **Trip Dispatch** — Cargo weight validation against vehicle payload, driver/vehicle availability gating, GPS route tracking, lifecycle transitions (Scheduled → In Progress → Completed/Cancelled)
+- **Maintenance Logs** — Auto-transitions vehicle status to `MAINTENANCE` on create, reverts to `AVAILABLE` on completion
+- **Fuel Logs** — Strictly-increasing odometer validation, per-vehicle fuel efficiency tracking
+- **Expense Logs** — Per-trip cost categorization, attached to dispatches
+
+### 🤖 AI Copilot (Powered by Gemini 2.5 Flash)
+- **TransitOps Copilot** — Floating AI assistant available on every dashboard screen
+- Receives real-time fleet context (active trips, vehicle/driver counts, maintenance status) as system prompt
+- Supports open-ended operations queries: "What is the current fleet utilization?", "Draft a delay notice for Route X"
+- Graceful offline fallback with live fleet snapshot if API key isn't configured
+- One-click suggestion prompts for common operational queries
+
+### 👤 Authentication & RBAC
+- JWT-based authentication (SimpleJWT) with token blacklisting on logout
+- **4 Roles**: Administrator, Dispatcher, Maintenance Manager, Fleet Driver
+- Role-based UI (menu items filtered per role, API permissions enforced per endpoint)
+- Full self-registration with role selection
+- **Driver registration** auto-creates a linked `Driver` profile with license info
+
+### 📊 Operations Dashboard
+- 6 live KPI cards: Active Trips, Fleet Size, Available Drivers, Utilization %, Under Maintenance, Expiring Licenses
+- Monthly Dispatch Trend area chart (last 6 months)
+- Fleet Status donut chart (Available / On Trip / Maintenance / OOS)
+- Financial Audit bar chart (Fuel / Maintenance / Expenses breakdown)
+- System Alert Center (expired licenses, active maintenance, out-of-service vehicles)
+- Live Dispatches feed with status badges
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Django 5.0, Django REST Framework, SimpleJWT |
+| AI | Google GenAI SDK (Gemini 2.5 Flash) |
+| Frontend | React 18, Vite, Tailwind CSS v4 |
+| Charts | Recharts |
+| Animations | Framer Motion |
+| Auth | JWT + Token Blacklisting |
+| DB | SQLite (dev) / PostgreSQL (prod-ready) |
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.11+
-- Node.js 20+
-- Git
-
----
+- Python 3.12+
+- Node.js 18+
 
 ### Backend Setup
 
 ```bash
 cd backend
-
-# 1. Create and activate virtual environment
 python -m venv venv
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # macOS/Linux
 
-# 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Configure environment
-copy .env.example .env      # Windows
-# cp .env.example .env      # macOS/Linux
-
-# 4. Run database migrations
 python manage.py migrate
+python manage.py createsuperuser  # Creates admin account
 
-# 5. Seed demo data (optional but recommended)
-python seed.py
+# (Optional) Seed demo accounts
+python manage.py seed_demo_users
 
-# 6. Start development server
-python manage.py runserver
+python manage.py runserver 8000
 ```
 
-Backend runs at: **http://localhost:8000**
-
----
+Set `GEMINI_API_KEY` environment variable to enable AI Copilot:
+```bash
+set GEMINI_API_KEY=your_api_key_here    # Windows
+# export GEMINI_API_KEY=your_key        # macOS/Linux
+```
 
 ### Frontend Setup
 
 ```bash
 cd frontend
-
-# 1. Install dependencies
+cp .env.example .env
 npm install
-
-# 2. Configure environment
-copy .env.example .env      # Windows
-# cp .env.example .env      # macOS/Linux
-
-# 3. Start Vite dev server
 npm run dev
 ```
 
-Frontend runs at: **http://localhost:5173**
+The app runs on **http://localhost:5174**
 
 ---
 
-## 🔑 Demo Credentials
+## 🔑 Demo Sandbox Accounts
 
 | Role | Email | Password |
-|------|-------|----------|
+|---|---|---|
 | Administrator | admin@transitops.com | TransitOps@2024 |
 | Dispatcher | dispatcher@transitops.com | TransitOps@2024 |
-| Maintenance Mgr | maintenance@transitops.com | TransitOps@2024 |
-| Driver | driver@transitops.com | TransitOps@2024 |
+| Maintenance Manager | maintenance@transitops.com | TransitOps@2024 |
+| Fleet Driver | driver@transitops.com | TransitOps@2024 |
 
 ---
 
-## 🛡️ RBAC — Role Access Matrix
+## 📁 Project Structure
 
-| Feature | ADMIN | DISPATCHER | MAINTENANCE | DRIVER |
-|---------|-------|------------|-------------|--------|
-| Dashboard Analytics | ✅ | ✅ | ✅ | ✅ |
-| Vehicles — View | ✅ | ✅ | ✅ | ✅ |
-| Vehicles — CRUD | ✅ | ✅ | ❌ | ❌ |
-| Drivers — View | ✅ | ✅ | ❌ | ❌ |
-| Drivers — CRUD | ✅ | ✅ | ❌ | ❌ |
-| Trips — View | ✅ | ✅ | ❌ | ✅ (own) |
-| Trips — Dispatch | ✅ | ✅ | ❌ | ❌ |
-| Maintenance — CRUD | ✅ | ❌ | ✅ | ❌ |
-| Fuel Logs | ✅ | ✅ | ✅ | ✅ |
-| Expenses — Submit | ✅ | ✅ | ✅ | ✅ |
-| Expenses — Approve | ✅ | ❌ | ❌ | ❌ |
-| User Management | ✅ | ❌ | ❌ | ❌ |
+```
+TransitOps/
+├── backend/
+│   ├── api/
+│   │   ├── models.py           # Vehicle, Driver, Trip, MaintenanceLog, FuelLog, ExpenseLog
+│   │   ├── serializers.py      # DRF serializers with full validation logic
+│   │   ├── views.py            # ViewSets + Analytics + AI Copilot endpoint
+│   │   ├── admin.py            # Django Admin config for all models
+│   │   ├── permissions.py      # RBAC permission classes
+│   │   └── urls.py             # All REST routes
+│   ├── transitops_backend/
+│   │   ├── settings.py
+│   │   └── pagination.py       # Custom StandardResultsPagination
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── DashboardLayout.jsx   # Layout with AI Copilot drawer
+│   │   ├── context/AuthContext.jsx
+│   │   ├── pages/
+│   │   │   ├── Login.jsx             # Sign In + Register (all 4 roles)
+│   │   │   ├── Dashboard.jsx         # Operations Center
+│   │   │   ├── Vehicles.jsx
+│   │   │   ├── Drivers.jsx
+│   │   │   ├── Trips.jsx
+│   │   │   ├── Maintenance.jsx
+│   │   │   ├── FuelLogs.jsx
+│   │   │   ├── Expenses.jsx
+│   │   │   └── Reports.jsx
+│   │   └── api/axiosInstance.js
+│   └── public/
+│       └── bg-highway.png            # Login background
+└── README.md
+```
 
 ---
 
-## 📡 API Reference
+## 🤖 AI Copilot API
 
-All endpoints are prefixed with `/api/`
+```
+POST /api/ai/chat/
+Authorization: Bearer <token>
 
-### Authentication
+Body: { "message": "How many drivers are currently available?" }
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/auth/login/` | Obtain access + refresh tokens | None |
-| POST | `/auth/logout/` | Blacklist refresh token | Required |
-| POST | `/auth/token/refresh/` | Silent token refresh | None |
-| GET | `/auth/me/` | Get current user profile | Required |
-| POST | `/auth/register/` | Create new user | Admin |
-| POST | `/auth/change-password/` | Change own password | Required |
+Response: { "reply": "3 out of 8 registered drivers are currently available." }
+```
 
-### Resources
+---
+
+## 📡 Key API Endpoints
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET/POST | `/vehicles/` | List / Create vehicles |
-| GET/PUT/DELETE | `/vehicles/{id}/` | Retrieve / Update / Archive |
-| GET/POST | `/drivers/` | List / Register drivers |
-| GET/PUT/DELETE | `/drivers/{id}/` | Driver detail operations |
-| GET/POST | `/trips/` | List / Dispatch trips |
-| GET/POST | `/maintenance/` | Maintenance log management |
-| GET/POST | `/fuel-logs/` | Fuel purchase logging |
-| GET/POST | `/expenses/` | Driver expense submissions |
-| GET | `/analytics/dashboard/` | KPI dashboard data |
-
----
-
-## 🏗️ Milestones
-
-| # | Milestone | Status |
-|---|-----------|--------|
-| 1 | Project Planning & Architecture | ✅ Done |
-| 2 | Project Foundation (Vite + Django scaffold) | ✅ Done |
-| 3 | Authentication & RBAC (JWT + protected routes) | ✅ Done |
-| 4 | Dashboard (KPIs, charts, alerts) | ✅ Done |
-| 5 | Vehicle & Driver Management | ✅ Done |
-| 6 | Trip Dispatch & Routing | 🚧 Next |
-| 7 | Maintenance & Fuel Logs | ⬜ Pending |
-| 8 | Expense Reimbursements | ⬜ Pending |
-| 9 | Reporting & Analytics | ⬜ Pending |
-| 10 | Final Polish & Deployment | ⬜ Pending |
-
----
-
-## 🧰 Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18, Vite 5, Tailwind CSS v4 |
-| State | React Context API |
-| HTTP Client | Axios (with silent refresh interceptor) |
-| Forms | React Hook Form + Zod |
-| Animations | Framer Motion |
-| Charts | Recharts |
-| Backend | Django 5, Django REST Framework |
-| Auth | SimpleJWT (access + refresh + blacklist) |
-| Database | SQLite (dev) / PostgreSQL (prod) |
-| CORS | django-cors-headers |
-| Filtering | django-filter |
+|---|---|---|
+| POST | `/api/auth/login/` | JWT Login |
+| POST | `/api/auth/register/` | Self-registration (all roles) |
+| GET | `/api/analytics/dashboard/` | Live KPIs and chart data |
+| POST | `/api/ai/chat/` | AI Copilot conversation |
+| GET/POST | `/api/vehicles/` | Vehicle CRUD |
+| GET/POST | `/api/drivers/` | Driver CRUD |
+| GET/POST | `/api/trips/` | Trip CRUD |
+| PATCH | `/api/trips/{id}/status/` | Trip lifecycle transitions |
+| GET/POST | `/api/maintenance/` | Maintenance logs |
+| GET/POST | `/api/fuel-logs/` | Fuel logs |
+| GET | `/api/analytics/reports/` | Fleet ROI per vehicle |
 
 ---
 
 ## 📄 License
 
-MIT — built for hackathon purposes.
+MIT © 2024 TransitOps

@@ -11,11 +11,17 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    strictPort: false,  // Auto-fallback to 5174 if 5173 is busy
     proxy: {
       '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/media': {
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
     },
   },
 })
+

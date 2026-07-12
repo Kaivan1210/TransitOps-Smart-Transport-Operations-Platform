@@ -46,28 +46,74 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """Admin-only user registration serializer."""
+    """User registration serializer supporting all roles (including Driver profile)."""
 
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirm = serializers.CharField(write_only=True)
+    
+    # Driver profile fields (optional depending on role)
+    license_number = serializers.CharField(required=False, write_only=True)
+    license_class = serializers.ChoiceField(choices=Driver.LicenseClass.choices, required=False, write_only=True)
+    license_expiry = serializers.DateField(required=False, write_only=True)
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'role', 'phone', 'password', 'password_confirm']
+        fields = [
+            'email', 'first_name', 'last_name', 'role', 'phone', 
+            'password', 'password_confirm', 
+            'license_number', 'license_class', 'license_expiry'
+        ]
 
     def validate(self, attrs):
         if attrs['password'] != attrs.pop('password_confirm'):
             raise serializers.ValidationError({'password': 'Passwords do not match.'})
+        
+        role = attrs.get('role')
+        if role == User.Role.DRIVER:
+            license_number = attrs.get('license_number')
+            license_class = attrs.get('license_class')
+            license_expiry = attrs.get('license_expiry')
+
+            if not license_number:
+                raise serializers.ValidationError({'license_number': 'License number is required for drivers.'})
+            if not license_class:
+                raise serializers.ValidationError({'license_class': 'License class is required for drivers.'})
+            if not license_expiry:
+                raise serializers.ValidationError({'license_expiry': 'License expiry date is required for drivers.'})
+
+            # Uniqueness check on driver license
+            if Driver.objects.filter(license_number=license_number, is_active=True).exists():
+                raise serializers.ValidationError({'license_number': 'A driver with this license number already exists.'})
+                
         return attrs
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        # Use email as username
+        license_number = validated_data.pop('license_number', None)
+        license_class = validated_data.pop('license_class', None)
+        license_expiry = validated_data.pop('license_expiry', None)
+
         validated_data['username'] = validated_data['email']
         user = User(**validated_data)
         user.set_password(password)
+        
+        if user.role == User.Role.ADMIN:
+            user.is_staff = True
+            user.is_superuser = True
+
         user.save()
+
+        if user.role == User.Role.DRIVER:
+            Driver.objects.create(
+                user=user,
+                license_number=license_number.upper().strip(),
+                license_class=license_class,
+                license_expiry=license_expiry,
+                status=Driver.Status.AVAILABLE
+            )
+
         return user
+
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -121,11 +167,13 @@ class VehicleSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         """Cross-field: odometer cannot decrease on update."""
         if self.instance and 'odometer' in attrs:
-            if attrs['odometer'] < float(self.instance.odometer):
+            from decimal import Decimal
+            if attrs['odometer'] < self.instance.odometer:
                 raise serializers.ValidationError(
                     {'odometer': 'Odometer reading cannot decrease.'}
                 )
         return attrs
+
 
 
 class VehicleListSerializer(serializers.ModelSerializer):

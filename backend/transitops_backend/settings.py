@@ -87,12 +87,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
 
 # Static files
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files (receipt image uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -111,9 +114,10 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'transitops_backend.pagination.StandardResultsPagination',
     'PAGE_SIZE': 20,
 }
+
 
 # ─── Simple JWT Configuration ─────────────────────────────────────────────────
 SIMPLE_JWT = {
@@ -128,7 +132,10 @@ SIMPLE_JWT = {
 
 # ─── CORS Configuration ───────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',  # Vite dev server
+    'http://localhost:5173',   # Vite dev server (primary)
     'http://127.0.0.1:5173',
+    'http://localhost:5174',   # Vite fallback port
+    'http://127.0.0.1:5174',
 ]
 CORS_ALLOW_CREDENTIALS = True
+

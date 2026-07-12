@@ -9,7 +9,7 @@ from .views import (
     LoginView, LogoutView, RegisterView, MeView, ChangePasswordView,
     UserViewSet, VehicleViewSet, DriverViewSet, TripViewSet,
     MaintenanceLogViewSet, FuelLogViewSet, ExpenseLogViewSet,
-    DashboardAnalyticsView, ReportsAnalyticsView
+    DashboardAnalyticsView, ReportsAnalyticsView, AIAssistantView
 )
 
 router = DefaultRouter()
@@ -30,6 +30,9 @@ urlpatterns = [
     path('auth/change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),  # Silent refresh
 
+    # AI assistant
+    path('ai/chat/', AIAssistantView.as_view(), name='ai-chat'),
+
     # Analytics
     path('analytics/dashboard/', DashboardAnalyticsView.as_view(), name='dashboard-analytics'),
     path('analytics/reports/', ReportsAnalyticsView.as_view(), name='reports-analytics'),
@@ -37,3 +40,4 @@ urlpatterns = [
     # All resource endpoints
     path('', include(router.urls)),
 ]
+
