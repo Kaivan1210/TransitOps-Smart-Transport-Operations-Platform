@@ -676,8 +676,8 @@ def get_local_fallback_reply(message):
         avail_drivers = Driver.objects.filter(is_active=True, status='AVAILABLE').count()
         trip_drivers = Driver.objects.filter(is_active=True, status='ON_TRIP').count()
         
-        active_trips = Trip.objects.filter(is_active=True, status='IN_PROGRESS').count()
-        pending_trips = Trip.objects.filter(is_active=True, status='SCHEDULED').count()
+        active_trips = Trip.objects.filter(status='IN_PROGRESS').count()
+        pending_trips = Trip.objects.filter(status='SCHEDULED').count()
         
         active_maint = MaintenanceLog.objects.filter(status='IN_PROGRESS').count()
         
