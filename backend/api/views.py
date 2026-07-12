@@ -679,10 +679,14 @@ class AIAssistantView(APIView):
             from google import genai
             from django.conf import settings as django_settings
             api_key = getattr(django_settings, 'GEMINI_API_KEY', None)
-            client = genai.Client(api_key=api_key) if api_key else genai.Client()
+
+            if not api_key:
+                raise ValueError("GEMINI_API_KEY is not set in settings.")
+
+            client = genai.Client(api_key=api_key)
             fleet_summary = get_fleet_summary()
 
-            system_prompt = (
+            system_instruction = (
                 "You are TransitOps Copilot, a highly intelligent transport operations assistant. "
                 "You help dispatchers, maintenance managers, admins, and drivers coordinate fleet operations. "
                 "Be extremely brief, professional, and action-oriented. Provide helpful advice or answers. "
@@ -690,25 +694,25 @@ class AIAssistantView(APIView):
                 f"{fleet_summary}"
             )
 
-            # Combine system prompt with user input
-            full_input = f"{system_prompt}\n\nUser Question: {user_message}"
+            full_input = f"{system_instruction}\n\nUser Question: {user_message}"
 
-            # Create chat interaction using gemini-2.5-flash
+            # google-genai SDK v2 — interactions API
             interaction = client.interactions.create(
                 model="gemini-2.5-flash",
                 input=full_input
             )
 
-            response_text = interaction.output_text
-            return Response({'reply': response_text}, status=status.HTTP_200_OK)
-            
+            return Response({'reply': interaction.output_text}, status=status.HTTP_200_OK)
+
         except Exception as e:
-            # Smart fallback in case of missing API Key or rate limits
+            error_msg = str(e)
             fallback_text = (
-                "I am TransitOps Copilot. I'm currently running in local fallback mode. "
-                "Here is the real-time operational status of the fleet:\n\n"
-                f"{get_fleet_summary()}\n\n"
-                "Please configure a valid GEMINI_API_KEY environment variable to enable open-ended chat."
+                "⚠️ TransitOps Copilot is offline.\n\n"
+                f"Error: {error_msg[:300]}\n\n"
+                "── Live Fleet Snapshot ──\n"
+                f"{get_fleet_summary()}"
             )
             return Response({'reply': fallback_text}, status=status.HTTP_200_OK)
+
+
 

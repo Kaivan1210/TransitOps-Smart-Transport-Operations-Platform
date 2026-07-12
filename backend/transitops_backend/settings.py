@@ -6,6 +6,13 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
+# Load environment variables from backend/.env automatically
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parent.parent / '.env')
+except ImportError:
+    pass
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get(
@@ -140,9 +147,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # ─── Google Gemini AI Configuration ──────────────────────────────────────────
-GEMINI_API_KEY = os.environ.get(
-    'GEMINI_API_KEY',
-    'AIzaSyAQ.Ab8RN6K4GlO0VoMDOWJSON-D4BXiwUzz41W6GQ38InDeUy1YRg'
-)
+# Set GEMINI_API_KEY in your environment or backend/.env file (never commit secrets to git)
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 
 
