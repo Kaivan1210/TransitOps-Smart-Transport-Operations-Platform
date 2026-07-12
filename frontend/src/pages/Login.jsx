@@ -56,14 +56,17 @@ const FieldError = ({ error }) => error ? (
 ) : null;
 
 // ─── Input ───────────────────────────────────────────────────────────────────
-const Input = ({ error, className = '', ...props }) => (
+const Input = React.forwardRef(({ error, className = '', ...props }, ref) => (
   <input
+    ref={ref}
     {...props}
     className={`block w-full rounded-xl border bg-white/[0.03] px-3.5 py-2.5 text-white placeholder-gray-600 focus:border-white/20 focus:ring-1 focus:ring-white/10 text-sm transition outline-none ${
       error ? 'border-red-500/40' : 'border-white/[0.07]'
     } ${className}`}
   />
-);
+));
+Input.displayName = 'Input';
+
 
 const Login = () => {
   const { login } = useAuth();
