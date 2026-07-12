@@ -8,9 +8,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Plus, X, Calendar, ChevronDown, RefreshCw,
   Truck, Users, MapPin, Package, PlayCircle, CheckCircle2,
-  XCircle, AlertTriangle, ArrowRight, ClipboardList,
+  XCircle, AlertTriangle, ArrowRight, ClipboardList, Navigation
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import LiveTrackerModal from '../components/LiveTrackerModal';
 
 // ─── Zod Schema ────────────────────────────────────────────────────────────────
 const schema = z.object({
@@ -105,6 +106,7 @@ const Trips = () => {
   const [statusFilter, setFilter]   = useState('');
   const [isModalOpen, setModal]     = useState(false);
   const [completeTrip, setComplete] = useState(null);
+  const [trackingTrip, setTrackingTrip] = useState(null);
   const [vehicles, setVehicles]     = useState([]);
   const [drivers, setDrivers]       = useState([]);
 
@@ -340,6 +342,12 @@ const Trips = () => {
                       {trip.status === 'IN_PROGRESS' && (
                         <>
                           <button
+                            onClick={() => setTrackingTrip(trip)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-blue-400 text-xs font-semibold transition"
+                          >
+                            <Navigation className="h-4 w-4 animate-pulse" /> Track Live
+                          </button>
+                          <button
                             onClick={() => setComplete(trip)}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/20 text-emerald-400 text-xs font-semibold transition"
                           >
@@ -481,6 +489,16 @@ const Trips = () => {
             trip={completeTrip}
             onClose={() => setComplete(null)}
             onComplete={handleComplete}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── Live Map Tracker Modal ── */}
+      <AnimatePresence>
+        {trackingTrip && (
+          <LiveTrackerModal
+            trip={trackingTrip}
+            onClose={() => setTrackingTrip(null)}
           />
         )}
       </AnimatePresence>
