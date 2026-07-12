@@ -91,13 +91,50 @@ class VehicleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    def validate_license_plate(self, value):
+        """Enforce unique license plate, excluding current instance on update."""
+        qs = Vehicle.objects.filter(license_plate=value, is_active=True)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                f"A vehicle with license plate '{value}' is already registered."
+            )
+        return value.upper().strip()
+
+    def validate_vin(self, value):
+        """Enforce VIN uniqueness (17-char alphanumeric) if provided."""
+        if not value:
+            return value
+        value = value.upper().strip()
+        if len(value) != 17:
+            raise serializers.ValidationError('VIN must be exactly 17 characters.')
+        qs = Vehicle.objects.filter(vin=value, is_active=True)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                f"A vehicle with VIN '{value}' is already registered."
+            )
+        return value
+
+    def validate(self, attrs):
+        """Cross-field: odometer cannot decrease on update."""
+        if self.instance and 'odometer' in attrs:
+            if attrs['odometer'] < float(self.instance.odometer):
+                raise serializers.ValidationError(
+                    {'odometer': 'Odometer reading cannot decrease.'}
+                )
+        return attrs
+
 
 class VehicleListSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for list views."""
+    """Lightweight serializer for list views — includes fields required by card UI."""
 
     class Meta:
         model = Vehicle
-        fields = ['id', 'make', 'model', 'year', 'license_plate', 'status', 'fuel_type', 'odometer']
+        fields = ['id', 'make', 'model', 'year', 'license_plate', 'vin',
+                  'status', 'fuel_type', 'odometer', 'payload_capacity_kg']
 
 
 # ─── Driver Serializers ───────────────────────────────────────────────────────

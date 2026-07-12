@@ -107,6 +107,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
     filterset_fields = ['status', 'fuel_type']
     search_fields = ['make', 'model', 'license_plate', 'vin']
     ordering_fields = ['created_at', 'make', 'year', 'odometer']
+    ordering = ['-created_at']  # default ordering
 
     def get_queryset(self):
         return Vehicle.objects.filter(is_active=True)
@@ -117,7 +118,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
         return VehicleSerializer
 
     def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'set_status']:
             return [IsAdminOrDispatcher()]
         return [IsAuthenticated()]
 
@@ -126,12 +127,30 @@ class VehicleViewSet(viewsets.ModelViewSet):
         vehicle = self.get_object()
         if vehicle.status == Vehicle.Status.ON_TRIP:
             return Response(
-                {'detail': 'Cannot delete a vehicle currently on a trip.'},
+                {'detail': 'Cannot archive a vehicle currently on an active trip.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         vehicle.is_active = False
         vehicle.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['patch'], url_path='set-status')
+    def set_status(self, request, pk=None):
+        """Quick status change endpoint. Prevents manual ON_TRIP setting."""
+        vehicle = self.get_object()
+        new_status = request.data.get('status')
+        valid = [c[0] for c in Vehicle.Status.choices]
+        if new_status not in valid:
+            return Response({'detail': f"Invalid status. Choose from: {', '.join(valid)}."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if new_status == Vehicle.Status.ON_TRIP:
+            return Response(
+                {'detail': 'Status ON_TRIP is managed automatically by trip dispatch.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        vehicle.status = new_status
+        vehicle.save(update_fields=['status', 'updated_at'])
+        return Response({'id': str(vehicle.id), 'status': vehicle.status})
 
 
 # ─── Driver ViewSet ───────────────────────────────────────────────────────────
