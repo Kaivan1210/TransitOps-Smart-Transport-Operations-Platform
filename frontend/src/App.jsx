@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Unauthorized from './pages/Unauthorized';
 import Vehicles from './pages/Vehicles';
 import Drivers from './pages/Drivers';
+import Trips from './pages/Trips';
 
 // Placeholder views for modules that will be developed in future milestones
 const PlaceholderView = ({ title }) => (
@@ -66,7 +67,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <PlaceholderView title="Trip Dispatch & Routing" />
+                  <Trips />
                 </DashboardLayout>
               </ProtectedRoute>
             }

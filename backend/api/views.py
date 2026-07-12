@@ -161,6 +161,7 @@ class DriverViewSet(viewsets.ModelViewSet):
     filterset_fields = ['status', 'license_class']
     search_fields = ['license_number', 'user__first_name', 'user__last_name', 'user__email']
     ordering_fields = ['created_at', 'license_expiry']
+    ordering = ['-created_at']
 
     def get_queryset(self):
         return Driver.objects.filter(is_active=True).select_related('user')
@@ -171,7 +172,7 @@ class DriverViewSet(viewsets.ModelViewSet):
         return DriverSerializer
 
     def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'set_status']:
             return [IsAdminOrDispatcher()]
         return [IsAuthenticated()]
 
@@ -180,12 +181,29 @@ class DriverViewSet(viewsets.ModelViewSet):
         driver = self.get_object()
         if driver.status == Driver.Status.ON_TRIP:
             return Response(
-                {'detail': 'Cannot delete a driver currently on a trip.'},
+                {'detail': 'Cannot archive a driver currently on an active trip.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         driver.is_active = False
         driver.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['patch'], url_path='set-status')
+    def set_status(self, request, pk=None):
+        """Quick status change. Blocks ON_TRIP (auto-managed by trip dispatch)."""
+        driver = self.get_object()
+        new_status = request.data.get('status')
+        allowed = [Driver.Status.AVAILABLE, Driver.Status.SUSPENDED]
+        if new_status not in [c[0] for c in Driver.Status.choices]:
+            return Response({'detail': 'Invalid status.'}, status=status.HTTP_400_BAD_REQUEST)
+        if new_status == Driver.Status.ON_TRIP:
+            return Response(
+                {'detail': 'ON_TRIP status is managed automatically by trip dispatch.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        driver.status = new_status
+        driver.save(update_fields=['status', 'updated_at'])
+        return Response({'id': str(driver.id), 'status': driver.status})
 
 
 # ─── Trip ViewSet ─────────────────────────────────────────────────────────────

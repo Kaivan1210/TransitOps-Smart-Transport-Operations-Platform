@@ -140,6 +140,8 @@ class VehicleListSerializer(serializers.ModelSerializer):
 # ─── Driver Serializers ───────────────────────────────────────────────────────
 
 class DriverSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.full_name', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
     user_detail = UserSerializer(source='user', read_only=True)
     license_expired = serializers.BooleanField(read_only=True)
 
@@ -148,14 +150,32 @@ class DriverSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at', 'license_expired']
 
+    def validate_license_number(self, value):
+        """Enforce unique license number, excluding current instance on update."""
+        qs = Driver.objects.filter(license_number=value, is_active=True)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                f"License number '{value}' is already registered."
+            )
+        return value.upper().strip()
+
+    def validate_license_expiry(self, value):
+        """Warn but allow registration of expired licenses (business may backfill)."""
+        # Only block future dispatch via trip validation, not registration
+        return value
+
 
 class DriverListSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.full_name', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
     license_expired = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Driver
-        fields = ['id', 'user_name', 'license_number', 'license_class', 'license_expiry', 'status', 'license_expired']
+        fields = ['id', 'user', 'user_name', 'user_email', 'license_number',
+                  'license_class', 'license_expiry', 'status', 'license_expired']
 
 
 # ─── Trip Serializers ─────────────────────────────────────────────────────────
