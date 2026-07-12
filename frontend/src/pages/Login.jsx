@@ -4,9 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Shield, Key, Mail, Truck, UserCheck, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Key, Mail, Truck, UserCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+// ─── Zod Schema ────────────────────────────────────────────────────────────────
 const schema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
@@ -17,6 +19,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
@@ -29,88 +32,122 @@ const Login = () => {
     try {
       await login(data.email, data.password);
       navigate(from, { replace: true });
-    } catch (err) {
+    } catch {
       // toast is already fired in AuthContext login
     } finally {
       setLoading(false);
     }
   };
 
-  // Helper for fast hackathon testing
   const selectDemoRole = (email, pass) => {
     setValue('email', email);
     setValue('password', pass);
+    toast.success('Credentials filled. Click Sign In to connect!');
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.5, ease: 'easeOut', when: 'beforeChildren', staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 15, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0b0f19] px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Decorative blurred background shapes */}
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-blue-600/10 blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 rounded-full bg-emerald-600/10 blur-3xl pointer-events-none"></div>
+    <div className="flex min-h-screen items-center justify-center bg-[#070b11] px-4 py-12 relative overflow-hidden font-sans">
+      {/* Visual background ambient glow blobs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-600/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-15%] right-[-15%] w-[60%] h-[60%] rounded-full bg-indigo-600/10 blur-[180px] pointer-events-none" />
+      <div className="absolute top-[40%] right-[-20%] w-[35%] h-[35%] rounded-full bg-emerald-600/5 blur-[120px] pointer-events-none" />
 
-      <div className="w-full max-w-md space-y-8 glass-card p-8 rounded-2xl shadow-2xl relative z-10">
-        <div className="flex flex-col items-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-600 glow-blue text-white mb-4">
+      {/* Main card */}
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="w-full max-w-md bg-[#0d1220]/80 backdrop-blur-md rounded-2xl border border-gray-800/80 shadow-2xl p-8 space-y-7 relative z-10"
+      >
+        {/* Brand header */}
+        <motion.div variants={itemVariants} className="flex flex-col items-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 mb-4">
             <Truck className="h-8 w-8" />
           </div>
-          <h2 className="mt-2 text-center text-3xl font-extrabold tracking-tight text-white">
+          <h2 className="text-3xl font-extrabold tracking-tight text-white">
             Transit<span className="text-blue-500">Ops</span>
           </h2>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-gray-400 font-medium">
             Smart Transport Operations Platform
           </p>
-        </div>
+        </motion.div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4">
+        {/* Input form */}
+        <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+          <motion.div variants={itemVariants} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Email Address</label>
               <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-500" />
                 </div>
                 <input
                   {...register('email')}
                   type="email"
-                  className={`block w-full rounded-lg border bg-gray-900/50 pl-10 pr-3 py-2.5 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm ${errors.email ? 'border-red-500' : 'border-gray-800'}`}
+                  className={`block w-full rounded-lg border bg-gray-900/50 pl-10 pr-3 py-2.5 text-white placeholder-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm transition ${
+                    errors.email ? 'border-red-500/60' : 'border-gray-800'
+                  }`}
                   placeholder="name@transitops.com"
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 flex items-center text-xs text-red-500">
-                  <AlertCircle className="mr-1 h-3.5 w-3.5" />
+                <p className="mt-1.5 flex items-center text-xs text-red-400 font-medium">
+                  <AlertCircle className="mr-1 h-4 w-4" />
                   {errors.email.message}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Password</label>
               <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Key className="h-5 w-5 text-gray-500" />
                 </div>
                 <input
                   {...register('password')}
-                  type="password"
-                  className={`block w-full rounded-lg border bg-gray-900/50 pl-10 pr-3 py-2.5 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm ${errors.password ? 'border-red-500' : 'border-gray-800'}`}
+                  type={showPassword ? 'text' : 'password'}
+                  className={`block w-full rounded-lg border bg-gray-900/50 pl-10 pr-10 py-2.5 text-white placeholder-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm transition ${
+                    errors.password ? 'border-red-500/60' : 'border-gray-800'
+                  }`}
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
               {errors.password && (
-                <p className="mt-1 flex items-center text-xs text-red-500">
-                  <AlertCircle className="mr-1 h-3.5 w-3.5" />
+                <p className="mt-1.5 flex items-center text-xs text-red-400 font-medium">
+                  <AlertCircle className="mr-1 h-4 w-4" />
                   {errors.password.message}
                 </p>
               )}
             </div>
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div variants={itemVariants}>
             <button
               type="submit"
               disabled={loading}
-              className="group relative flex w-full justify-center rounded-lg border border-transparent bg-blue-600 py-3 px-4 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200 disabled:opacity-50"
+              className="flex w-full justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 py-3 text-sm font-semibold text-white focus:outline-none shadow-lg shadow-blue-500/10 hover:shadow-blue-500/25 transition duration-200 disabled:opacity-50"
             >
               {loading ? (
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -118,49 +155,49 @@ const Login = () => {
                 'Sign In'
               )}
             </button>
-          </div>
+          </motion.div>
         </form>
 
         {/* Demo Fast Access Credentials */}
-        <div className="mt-8 border-t border-gray-800/80 pt-6">
+        <motion.div variants={itemVariants} className="border-t border-gray-800/80 pt-6">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 flex items-center">
-              <UserCheck className="mr-1.5 h-3.5 w-3.5" /> Demo Accounts
+            <span className="text-xs font-bold uppercase tracking-widest text-gray-500 flex items-center gap-1.5">
+              <UserCheck className="h-4 w-4 text-blue-500" /> Demo Sandbox Accounts
             </span>
-            <span className="text-[10px] text-gray-500">Pass: TransitOps@2024</span>
+            <span className="text-[10px] text-gray-600 font-mono">Pass: admin123</span>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="grid grid-cols-2 gap-2 text-2xs">
             <button
-              onClick={() => selectDemoRole('admin@transitops.com', 'TransitOps@2024')}
-              className="flex flex-col items-start p-2 rounded-lg bg-gray-900/40 border border-gray-800 hover:border-blue-500/50 hover:bg-gray-800/20 text-left transition"
+              onClick={() => selectDemoRole('admin@transitops.com', 'admin123')}
+              className="flex flex-col items-start p-3 rounded-xl bg-gray-950/40 border border-gray-800/80 hover:border-blue-500/50 hover:bg-blue-600/5 text-left transition group"
             >
-              <span className="font-semibold text-blue-400">Admin</span>
-              <span className="text-[10px] text-gray-500 truncate w-full">admin@transitops.com</span>
+              <span className="font-bold text-blue-400 group-hover:text-blue-300">Administrator</span>
+              <span className="text-[10px] text-gray-500 mt-0.5 truncate w-full">admin@transitops.com</span>
             </button>
             <button
-              onClick={() => selectDemoRole('dispatcher@transitops.com', 'TransitOps@2024')}
-              className="flex flex-col items-start p-2 rounded-lg bg-gray-900/40 border border-gray-800 hover:border-blue-500/50 hover:bg-gray-800/20 text-left transition"
+              onClick={() => selectDemoRole('dispatcher@transitops.com', 'admin123')}
+              className="flex flex-col items-start p-3 rounded-xl bg-gray-950/40 border border-gray-800/80 hover:border-purple-500/50 hover:bg-purple-600/5 text-left transition group"
             >
-              <span className="font-semibold text-purple-400">Dispatcher</span>
-              <span className="text-[10px] text-gray-500 truncate w-full">dispatcher@transitops.com</span>
+              <span className="font-bold text-purple-400 group-hover:text-purple-300">Dispatcher</span>
+              <span className="text-[10px] text-gray-500 mt-0.5 truncate w-full">dispatcher@transitops.com</span>
             </button>
             <button
-              onClick={() => selectDemoRole('maintenance@transitops.com', 'TransitOps@2024')}
-              className="flex flex-col items-start p-2 rounded-lg bg-gray-900/40 border border-gray-800 hover:border-blue-500/50 hover:bg-gray-800/20 text-left transition"
+              onClick={() => selectDemoRole('maintenance@transitops.com', 'admin123')}
+              className="flex flex-col items-start p-3 rounded-xl bg-gray-950/40 border border-gray-800/80 hover:border-amber-500/50 hover:bg-amber-600/5 text-left transition group"
             >
-              <span className="font-semibold text-amber-400">Maintenance</span>
-              <span className="text-[10px] text-gray-500 truncate w-full">maintenance@transitops.com</span>
+              <span className="font-bold text-amber-400 group-hover:text-amber-300">Maintenance</span>
+              <span className="text-[10px] text-gray-500 mt-0.5 truncate w-full">maintenance@transitops.com</span>
             </button>
             <button
-              onClick={() => selectDemoRole('driver@transitops.com', 'TransitOps@2024')}
-              className="flex flex-col items-start p-2 rounded-lg bg-gray-900/40 border border-gray-800 hover:border-blue-500/50 hover:bg-gray-800/20 text-left transition"
+              onClick={() => selectDemoRole('driver@transitops.com', 'admin123')}
+              className="flex flex-col items-start p-3 rounded-xl bg-gray-950/40 border border-gray-800/80 hover:border-emerald-500/50 hover:bg-emerald-600/5 text-left transition group"
             >
-              <span className="font-semibold text-emerald-400">Driver</span>
-              <span className="text-[10px] text-gray-500 truncate w-full">driver@transitops.com</span>
+              <span className="font-bold text-emerald-400 group-hover:text-emerald-300">Fleet Driver</span>
+              <span className="text-[10px] text-gray-500 mt-0.5 truncate w-full">driver@transitops.com</span>
             </button>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
