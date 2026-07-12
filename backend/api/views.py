@@ -398,6 +398,24 @@ class DashboardAnalyticsView(APIView):
             many=True
         ).data
 
+        # Vehicle fleet status breakdown
+        from django.db.models import Count as CNT
+        fleet_status_breakdown = list(
+            Vehicle.objects.filter(is_active=True)
+                           .values('status')
+                           .annotate(count=CNT('id'))
+                           .order_by('status')
+        )
+
+        # Licenses expiring within 30 days
+        from datetime import timedelta
+        thirty_days_later = timezone.now().date() + timedelta(days=30)
+        expiring_licenses_30d = Driver.objects.filter(
+            is_active=True,
+            license_expiry__gte=timezone.now().date(),
+            license_expiry__lte=thirty_days_later
+        ).count()
+
         # Monthly trip counts (last 6 months)
         from django.db.models.functions import TruncMonth
         from datetime import timedelta
@@ -460,17 +478,19 @@ class DashboardAnalyticsView(APIView):
                 'total_vehicles': total_vehicles,
                 'total_drivers': total_drivers,
                 'available_drivers': available_drivers,
+                'expiring_licenses_30d': expiring_licenses_30d,
                 'fleet_utilization_pct': round(
                     (active_trips / total_vehicles * 100) if total_vehicles else 0, 1
                 ),
             },
             'recent_trips': recent_trips,
             'monthly_trips': list(monthly_trips),
+            'fleet_status_breakdown': fleet_status_breakdown,
             'cost_breakdown': {
                 'maintenance': float(total_maintenance_cost),
                 'fuel': float(total_fuel_cost),
                 'expenses': float(total_expenses_cost),
                 'total': float(total_maintenance_cost + total_fuel_cost + total_expenses_cost)
             },
-            'active_alerts': active_alerts[:5], # Limit to 5 alerts
+            'active_alerts': active_alerts[:5],
         })
