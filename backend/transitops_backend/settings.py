@@ -139,3 +139,10 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
+# ─── Google Gemini AI Configuration ──────────────────────────────────────────
+GEMINI_API_KEY = os.environ.get(
+    'GEMINI_API_KEY',
+    'AIzaSyAQ.Ab8RN6K4GlO0VoMDOWJSON-D4BXiwUzz41W6GQ38InDeUy1YRg'
+)
+
+

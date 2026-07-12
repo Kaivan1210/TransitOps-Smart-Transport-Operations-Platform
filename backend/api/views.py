@@ -677,7 +677,9 @@ class AIAssistantView(APIView):
 
         try:
             from google import genai
-            client = genai.Client()
+            from django.conf import settings as django_settings
+            api_key = getattr(django_settings, 'GEMINI_API_KEY', None)
+            client = genai.Client(api_key=api_key) if api_key else genai.Client()
             fleet_summary = get_fleet_summary()
 
             system_prompt = (
