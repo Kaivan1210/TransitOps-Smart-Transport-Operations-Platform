@@ -389,9 +389,11 @@ const DashboardLayout = ({ children }) => {
                       {msg.sender === 'user' ? (
                         msg.text
                       ) : (
-                        <ReactMarkdown className="markdown-content">
-                          {msg.text}
-                        </ReactMarkdown>
+                        <div className="markdown-content">
+                          <ReactMarkdown>
+                            {msg.text}
+                          </ReactMarkdown>
+                        </div>
                       )}
                     </div>
                   </motion.div>
