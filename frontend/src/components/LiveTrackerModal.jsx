@@ -103,8 +103,8 @@ const LiveTrackerModal = ({ trip, onClose }) => {
 
         mapRef.current = map;
 
-        // Dark matter tiles styling (CartoDB)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        // CartoDB Voyager Light-mode tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
           maxZoom: 19
         }).addTo(map);
 
@@ -287,6 +287,16 @@ const LiveTrackerModal = ({ trip, onClose }) => {
                 <p className="text-xs text-white font-extrabold truncate">{trip.route_destination}</p>
               </div>
             </div>
+
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(trip.route_origin)}&destination=${encodeURIComponent(trip.route_destination)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 flex w-full justify-center items-center gap-2 rounded-xl py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 transition shadow-lg shadow-blue-500/20"
+            >
+              <Navigation className="h-3.5 w-3.5" />
+              Navigate (Google Maps)
+            </a>
           </div>
         </div>
       </motion.div>
