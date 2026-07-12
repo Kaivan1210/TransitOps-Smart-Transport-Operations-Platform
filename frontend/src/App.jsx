@@ -7,6 +7,8 @@ import DashboardLayout from './components/DashboardLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Unauthorized from './pages/Unauthorized';
+import Vehicles from './pages/Vehicles';
+import Drivers from './pages/Drivers';
 
 // Placeholder views for modules that will be developed in future milestones
 const PlaceholderView = ({ title }) => (
@@ -42,7 +44,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <PlaceholderView title="Vehicles Registry" />
+                  <Vehicles />
                 </DashboardLayout>
               </ProtectedRoute>
             }
@@ -53,7 +55,7 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'DISPATCHER']}>
                 <DashboardLayout>
-                  <PlaceholderView title="Driver Profiles" />
+                  <Drivers />
                 </DashboardLayout>
               </ProtectedRoute>
             }
