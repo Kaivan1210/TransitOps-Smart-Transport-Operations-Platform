@@ -531,3 +531,77 @@ class DashboardAnalyticsView(APIView):
             },
             'active_alerts': active_alerts[:5],
         })
+
+
+# ─── Reports Analytics View ───────────────────────────────────────────────────
+
+class ReportsAnalyticsView(APIView):
+    """Returns detailed vehicle-by-vehicle reports including costs, distance and ROI."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from django.db.models import Sum
+
+        vehicles = Vehicle.objects.filter(is_active=True)
+        report_data = []
+
+        fuel_map = {
+            res['vehicle_id']: res
+            for res in FuelLog.objects.values('vehicle_id').annotate(
+                total_cost=Sum('total_cost'),
+                total_liters=Sum('liters')
+            )
+        }
+
+        maint_map = {
+            res['vehicle_id']: res['total']
+            for res in MaintenanceLog.objects.values('vehicle_id').annotate(
+                total=Sum('cost')
+            )
+        }
+
+        trip_map = {
+            res['vehicle_id']: res['total']
+            for res in Trip.objects.filter(status=Trip.Status.COMPLETED).values('vehicle_id').annotate(
+                total=Sum('actual_distance_km')
+            )
+        }
+
+        expense_map = {
+            res['trip__vehicle_id']: res['total']
+            for res in ExpenseLog.objects.values('trip__vehicle_id').annotate(
+                total=Sum('amount')
+            )
+        }
+
+        for v in vehicles:
+            v_id = v.id
+            fuel_cost = float(fuel_map.get(v_id, {}).get('total_cost') or 0)
+            fuel_liters = float(fuel_map.get(v_id, {}).get('total_liters') or 0)
+            maint_cost = float(maint_map.get(v_id) or 0)
+            distance = float(trip_map.get(v_id) or 0)
+            expense_cost = float(expense_map.get(v_id) or 0)
+
+            efficiency = round(distance / fuel_liters, 2) if fuel_liters > 0 else 0
+            total_cost = fuel_cost + maint_cost + expense_cost
+            cost_per_km = round(total_cost / distance, 2) if distance > 0 else 0
+
+            report_data.append({
+                'id': str(v.id),
+                'vehicle_name': f"{v.year} {v.make} {v.model}",
+                'license_plate': v.license_plate,
+                'fuel_type': v.fuel_type,
+                'fuel_cost': fuel_cost,
+                'fuel_liters': fuel_liters,
+                'maintenance_cost': maint_cost,
+                'distance_km': distance,
+                'expenses_cost': expense_cost,
+                'fuel_efficiency': efficiency,
+                'total_cost': total_cost,
+                'cost_per_km': cost_per_km,
+            })
+
+        return Response({
+            'fleet_roi_reports': report_data
+        })
+

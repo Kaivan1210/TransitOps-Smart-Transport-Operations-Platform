@@ -13,6 +13,7 @@ import Trips from './pages/Trips';
 import Maintenance from './pages/Maintenance';
 import FuelLogs from './pages/FuelLogs';
 import Expenses from './pages/Expenses';
+import Reports from './pages/Reports';
 
 // Placeholder views for modules that will be developed in future milestones
 const PlaceholderView = ({ title }) => (
@@ -104,6 +105,17 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <Expenses />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'DISPATCHER']}>
+                <DashboardLayout>
+                  <Reports />
                 </DashboardLayout>
               </ProtectedRoute>
             }

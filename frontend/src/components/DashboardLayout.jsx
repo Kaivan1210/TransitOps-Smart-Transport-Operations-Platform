@@ -20,6 +20,7 @@ const DashboardLayout = ({ children }) => {
     { name: 'Maintenance', path: '/maintenance', icon: Wrench, roles: ['ADMIN', 'MAINTENANCE'] },
     { name: 'Fuel Logs', path: '/fuel-logs', icon: Fuel, roles: null },
     { name: 'Expenses', path: '/expenses', icon: CreditCard, roles: null },
+    { name: 'Reports', path: '/reports', icon: BarChart3, roles: ['ADMIN', 'DISPATCHER'] },
   ];
 
   const handleLogout = async () => {

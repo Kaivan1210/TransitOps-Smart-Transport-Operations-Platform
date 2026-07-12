@@ -9,7 +9,7 @@ from .views import (
     LoginView, LogoutView, RegisterView, MeView, ChangePasswordView,
     UserViewSet, VehicleViewSet, DriverViewSet, TripViewSet,
     MaintenanceLogViewSet, FuelLogViewSet, ExpenseLogViewSet,
-    DashboardAnalyticsView
+    DashboardAnalyticsView, ReportsAnalyticsView
 )
 
 router = DefaultRouter()
@@ -32,6 +32,7 @@ urlpatterns = [
 
     # Analytics
     path('analytics/dashboard/', DashboardAnalyticsView.as_view(), name='dashboard-analytics'),
+    path('analytics/reports/', ReportsAnalyticsView.as_view(), name='reports-analytics'),
 
     # All resource endpoints
     path('', include(router.urls)),
