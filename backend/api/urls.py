@@ -4,6 +4,7 @@ All REST endpoints registered with DRF's DefaultRouter.
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     LoginView, LogoutView, RegisterView, MeView, ChangePasswordView,
     UserViewSet, VehicleViewSet, DriverViewSet, TripViewSet,
@@ -27,6 +28,7 @@ urlpatterns = [
     path('auth/register/', RegisterView.as_view(), name='register'),
     path('auth/me/', MeView.as_view(), name='me'),
     path('auth/change-password/', ChangePasswordView.as_view(), name='change-password'),
+    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),  # Silent refresh
 
     # Analytics
     path('analytics/dashboard/', DashboardAnalyticsView.as_view(), name='dashboard-analytics'),
