@@ -410,6 +410,48 @@ class DashboardAnalyticsView(APIView):
                         .order_by('month')
         )
 
+        # Cost aggregations
+        total_maintenance_cost = MaintenanceLog.objects.aggregate(total=Sum('cost'))['total'] or 0
+        # FuelLog calculates total_cost in save method, so it is stored in database
+        total_fuel_cost = FuelLog.objects.aggregate(total=Sum('total_cost'))['total'] or 0
+        total_expenses_cost = ExpenseLog.objects.aggregate(total=Sum('amount'))['total'] or 0
+
+        # System alerts
+        active_alerts = []
+        
+        # Expired licenses
+        expired_drivers = Driver.objects.filter(license_expiry__lt=timezone.now().date(), is_active=True).select_related('user')
+        for d in expired_drivers:
+            active_alerts.append({
+                'id': f"driver-{d.id}",
+                'type': 'LICENSE_EXPIRED',
+                'severity': 'DANGER',
+                'title': 'Driver License Expired',
+                'message': f"Driver {d.user.full_name}'s license expired on {d.license_expiry.strftime('%Y-%m-%d')}.",
+            })
+
+        # Scheduled/In Progress Maintenance
+        active_maint = MaintenanceLog.objects.filter(status__in=[MaintenanceLog.Status.SCHEDULED, MaintenanceLog.Status.IN_PROGRESS]).select_related('vehicle')
+        for m in active_maint:
+            active_alerts.append({
+                'id': f"maint-{m.id}",
+                'type': 'MAINTENANCE_REQUIRED',
+                'severity': 'WARNING',
+                'title': 'Maintenance Required',
+                'message': f"Vehicle {m.vehicle.license_plate} has maintenance scheduled/active: {m.description[:40]}...",
+            })
+
+        # Out of Service Vehicles
+        oos_vehicles = Vehicle.objects.filter(status=Vehicle.Status.OUT_OF_SERVICE, is_active=True)
+        for v in oos_vehicles:
+            active_alerts.append({
+                'id': f"vehicle-oos-{v.id}",
+                'type': 'VEHICLE_OOS',
+                'severity': 'DANGER',
+                'title': 'Vehicle Out of Service',
+                'message': f"Vehicle {v.make} {v.model} ({v.license_plate}) is marked Out of Service.",
+            })
+
         return Response({
             'kpis': {
                 'active_trips': active_trips,
@@ -424,4 +466,11 @@ class DashboardAnalyticsView(APIView):
             },
             'recent_trips': recent_trips,
             'monthly_trips': list(monthly_trips),
+            'cost_breakdown': {
+                'maintenance': float(total_maintenance_cost),
+                'fuel': float(total_fuel_cost),
+                'expenses': float(total_expenses_cost),
+                'total': float(total_maintenance_cost + total_fuel_cost + total_expenses_cost)
+            },
+            'active_alerts': active_alerts[:5], # Limit to 5 alerts
         })
