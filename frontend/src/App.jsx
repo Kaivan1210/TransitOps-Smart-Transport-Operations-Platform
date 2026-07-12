@@ -10,6 +10,9 @@ import Unauthorized from './pages/Unauthorized';
 import Vehicles from './pages/Vehicles';
 import Drivers from './pages/Drivers';
 import Trips from './pages/Trips';
+import Maintenance from './pages/Maintenance';
+import FuelLogs from './pages/FuelLogs';
+import Expenses from './pages/Expenses';
 
 // Placeholder views for modules that will be developed in future milestones
 const PlaceholderView = ({ title }) => (
@@ -78,7 +81,7 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'MAINTENANCE']}>
                 <DashboardLayout>
-                  <PlaceholderView title="Maintenance & Repairs" />
+                  <Maintenance />
                 </DashboardLayout>
               </ProtectedRoute>
             }
@@ -89,7 +92,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <PlaceholderView title="Fuel Purchase Logs" />
+                  <FuelLogs />
                 </DashboardLayout>
               </ProtectedRoute>
             }
@@ -100,7 +103,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardLayout>
-                  <PlaceholderView title="Driver Expense Reimbursements" />
+                  <Expenses />
                 </DashboardLayout>
               </ProtectedRoute>
             }

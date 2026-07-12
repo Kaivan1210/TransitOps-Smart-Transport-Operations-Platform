@@ -195,11 +195,12 @@ class TripSerializer(serializers.ModelSerializer):
 
 class MaintenanceLogSerializer(serializers.ModelSerializer):
     vehicle_detail = VehicleListSerializer(source='vehicle', read_only=True)
+    created_by_name = serializers.CharField(source='created_by.full_name', read_only=True)
 
     class Meta:
         model = MaintenanceLog
         fields = '__all__'
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'created_by']
 
 
 # ─── Fuel Log Serializers ─────────────────────────────────────────────────────
@@ -218,8 +219,9 @@ class FuelLogSerializer(serializers.ModelSerializer):
 
 class ExpenseLogSerializer(serializers.ModelSerializer):
     trip_number = serializers.CharField(source='trip.trip_number', read_only=True)
+    created_by_name = serializers.CharField(source='created_by.full_name', read_only=True)
 
     class Meta:
         model = ExpenseLog
         fields = '__all__'
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id', 'created_at', 'created_by']
