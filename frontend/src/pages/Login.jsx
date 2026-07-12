@@ -25,8 +25,10 @@ const registerSchema = z.object({
   last_name: z.string().min(1, 'Required'),
   phone: z.string().min(10, 'Min 10 digits'),
   role: z.enum(['ADMIN', 'DISPATCHER', 'MAINTENANCE', 'DRIVER']),
-  password: z.string().min(6, 'At least 6 characters'),
-  password_confirm: z.string().min(6, 'Required'),
+  password: z.string()
+    .min(8, 'At least 8 characters')
+    .refine(v => !/^\d+$/.test(v), 'Cannot be entirely numeric'),
+  password_confirm: z.string().min(8, 'Required'),
   license_number: z.string().optional(),
   license_class: z.enum(['CLASS_A', 'CLASS_B', 'CLASS_C']).optional(),
   license_expiry: z.string().optional(),
@@ -502,6 +504,9 @@ const Login = () => {
                         <FieldError error={re.password_confirm} />
                       </div>
                     </div>
+                    <p className="text-[10px] text-gray-500/80 mt-1 pl-1">
+                      * Use at least 8 characters. Avoid entirely numeric or common passwords.
+                    </p>
 
                     <button type="submit" disabled={loading}
                       className="flex w-full justify-center items-center gap-2 rounded-xl py-3 text-sm font-extrabold text-white mt-1
