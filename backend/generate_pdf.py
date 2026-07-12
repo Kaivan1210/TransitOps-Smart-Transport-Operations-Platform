@@ -217,6 +217,13 @@ def create_workflow_pdf(filename="TransitOps_Workflow_Matrix.pdf"):
     story.append(Paragraph("• <b>Light-Mode Vector Mapping:</b> Utilizes Leaflet.js and CartoDB Voyager light tiles to draw road paths by geocoding origin/destination parameters using Nominatim and calculating OSRM coordinates.", bullet_style))
     story.append(Paragraph("• <b>Speed & Progress Simulation:</b> Active dispatches show real-time animated indicator progress, variable speed control, and continuous ETA estimations.", bullet_style))
     story.append(Paragraph("• <b>Google Maps External Link:</b> Provides deep-linked 'Navigate (Google Maps)' controls to load origin/destination address variables directly in external routing tabs.", bullet_style))
+    story.append(Spacer(1, 8))
+    
+    # 3.5 Dedicated Live Tracking Dashboard
+    story.append(Paragraph("3.5 Dedicated Live Tracking Dashboard", h2_style))
+    story.append(Paragraph("Provides a dedicated space in the main navigation for fleet-wide real-time tracking:", body_style))
+    story.append(Paragraph("• <b>Roster Panel:</b> Lists all active dispatches currently in-progress with vehicle and driver assignments.", bullet_style))
+    story.append(Paragraph("• <b>Map Center:</b> Clicking on any active dispatch dynamically focus the light-mode map on its route path with live telemetry simulation.", bullet_style))
     story.append(Spacer(1, 10))
     
     # ─── SECTION 4: AI ASSISTANT ───

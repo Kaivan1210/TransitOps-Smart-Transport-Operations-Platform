@@ -14,6 +14,7 @@ import Maintenance from './pages/Maintenance';
 import FuelLogs from './pages/FuelLogs';
 import Expenses from './pages/Expenses';
 import Reports from './pages/Reports';
+import Tracking from './pages/Tracking';
 
 // Placeholder views for modules that will be developed in future milestones
 const PlaceholderView = ({ title }) => (
@@ -72,6 +73,17 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <Trips />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/tracking"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Tracking />
                 </DashboardLayout>
               </ProtectedRoute>
             }

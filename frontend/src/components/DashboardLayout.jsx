@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Truck, Calendar, Users, LogOut, Wrench, Fuel, BarChart3,
   CreditCard, User, Menu, X, Bot, Send, Sparkles, ChevronDown,
-  Shield, Activity, Settings, Bell, Search, Home, TrendingUp, Package
+  Shield, Activity, Settings, Bell, Search, Home, TrendingUp, Package, Navigation
 } from 'lucide-react';
 import api from '../api/axiosInstance';
 
@@ -113,6 +113,7 @@ const buildMenu = (role) => {
     { name: 'Vehicles',     path: '/vehicles',    icon: Truck,     roles: null,      section: 'Fleet' },
     { name: 'Drivers',      path: '/drivers',     icon: Users,     roles: ['ADMIN','DISPATCHER'], section: 'Fleet' },
     { name: 'Trips',        path: '/trips',       icon: Calendar,  roles: null,      section: 'Operations' },
+    { name: 'Live Tracking',path: '/tracking',    icon: Navigation,roles: null,      section: 'Operations' },
     { name: 'Maintenance',  path: '/maintenance', icon: Wrench,    roles: ['ADMIN','MAINTENANCE'], section: 'Fleet Health' },
     { name: 'Fuel Logs',    path: '/fuel-logs',   icon: Fuel,      roles: null,      section: 'Finance' },
     { name: 'Expenses',     path: '/expenses',    icon: CreditCard,roles: null,      section: 'Finance' },
